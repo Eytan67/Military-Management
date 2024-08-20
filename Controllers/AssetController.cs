@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MilitaryManagement.Model;
+using MilitaryManagement.DAL;
 
 namespace MilitaryManagement.Controllers
 {
@@ -8,60 +9,69 @@ namespace MilitaryManagement.Controllers
     [ApiController]
     public class AssetController : ControllerBase
     {
-        private static List<Vehicle> _vehicles = new List<Vehicle>();
-        private static List<Weapon> _weapons = new List<Weapon>();
-        private static List<Personnel> _personnels = new List<Personnel>();
+        private readonly AssetDBContext _assetDBContext;
+        public AssetController(AssetDBContext context)
+        {
+            this._assetDBContext = context;
+        }      
 
-        
         [HttpGet]
         public IActionResult Get([FromQuery]AssetType type)
         {
-            var res = new List<BaseAsset>();
             switch(type)
             {
                 case AssetType.Vehicle:
-                    res.AddRange(_vehicles);
+                    return Ok(_assetDBContext.Vehicles);
                     break;
                 case AssetType.Weapon:
-                    res.AddRange(_weapons);
+                    return Ok(_assetDBContext.Weapons);
                     break;
                 case AssetType.Personnel:
-                    res.AddRange(_personnels);
-                    break;
-            }
-            if(res.Count > 0)
-                return Ok(res);
-            return NotFound();
-        }
-
-        [HttpPost]
-        public IActionResult Create([FromBody] BaseAsset asset)
-        {
-            if (asset == null)
-                return BadRequest("Asset cannot be null");
-
-            switch (asset.AssetType)
-            {
-                case AssetType.Vehicle:
-                    var vehicle = asset as Vehicle;
-                    if (vehicle != null)
-                        _vehicles.Add(vehicle);
-                    break;
-                case AssetType.Weapon:
-                    var weapon = asset as Weapon;
-                    if (weapon != null)
-                        _weapons.Add(weapon);
-                    break;
-                case AssetType.Personnel:
-                    var personnel = asset as Personnel;
-                    if (personnel != null)
-                        _personnels.Add(personnel);
+                    return Ok(_assetDBContext.Personnels);
                     break;
                 default:
-                    return BadRequest("Unknown asset type");
+                    return BadRequest();
+            }
+        }
+
+        [HttpPost("personnel")]
+        public IActionResult CreatePersonnel([FromBody] Personnel personnel)
+        {
+            if (personnel == null)
+                return BadRequest("Asset cannot be null");
+
+            _assetDBContext.Personnels.Add(personnel);
+            _assetDBContext.SaveChanges();
+            return Ok();
+
+        }
+        [HttpPost("weapon")]
+        public IActionResult CreateWeapon([FromBody] Weapon weapon)
+        {
+            if (weapon == null)
+            {
+                return BadRequest("Asset cannot be null");
+
             }
 
-            return CreatedAtAction(nameof(Get), new { id = asset.Id }, asset);
+            _assetDBContext.Weapons.Add(weapon);
+            _assetDBContext.SaveChanges();
+
+            return Ok();
+
+        }
+
+        [HttpPost("vehicle")]
+        public IActionResult CreateVehicle([FromBody] Vehicle vehicle)
+        {
+            if (vehicle == null)
+                return BadRequest("Asset cannot be null");
+
+            _assetDBContext.Vehicles.Add(vehicle);
+            _assetDBContext.SaveChanges();
+
+            return Ok();
+
         }
 
     }

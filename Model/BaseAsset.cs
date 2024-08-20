@@ -12,7 +12,14 @@
         Inactive,
         Maintenance
     }
-    public abstract class BaseAsset
+    public interface IAsset
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public AssetType AssetType { get; set; }
+        public Status Status { get; set; }
+    }
+    public abstract class BaseAsset : IAsset
     {
         public int Id {  get; set; }
         public string Name {  get; set; }
