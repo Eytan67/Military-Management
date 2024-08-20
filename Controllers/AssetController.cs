@@ -12,6 +12,7 @@ namespace MilitaryManagement.Controllers
         private static List<Weapon> _weapons = new List<Weapon>();
         private static List<Personnel> _personnels = new List<Personnel>();
 
+        
         [HttpGet]
         public IActionResult Get([FromQuery]AssetType type)
         {
